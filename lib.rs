@@ -63,7 +63,7 @@ mod fat_p2fa {
         }
 
         #[ink(message)]
-        pub fn init_2fa(&mut self) -> Result<String, Error> {
+        pub fn init_2fa(&mut self) -> Result<(), Error> {
             let caller = self.env().caller();
             self.secret.remove(caller.clone());
             self.verified.remove(caller.clone());
@@ -72,11 +72,19 @@ mod fat_p2fa {
 
             self.secret.insert(&caller, &secret);
 
-            Ok(self.get_url(&secret, "Phala2FA", "PhalaNetwork"))
+            Ok(())
         }
 
         #[ink(message)]
-        pub fn verify_2fa(&mut self, token: String) -> Result<(), Error> {
+        pub fn get_2fa_url(&self) -> Option<String> {
+            let caller = self.env().caller();
+            let secret = self.secret.get(&caller)?;
+
+            Some(self.get_url(&secret, "Phala2FA", "PhalaNetwork"))
+        }
+
+        #[ink(message)]
+        pub fn verify_bind(&mut self, token: String) -> Result<(), Error> {
             let caller = self.env().caller();
             let secret = self.secret.get(&caller)
                 .ok_or(Error::AccountNotInitialized)?;
@@ -102,10 +110,31 @@ mod fat_p2fa {
         }
 
         #[ink(message)]
-        pub fn unbind_2fa(&mut self) -> Result<(), Error> {
+        pub fn enabled_2fa(&self) -> bool {
             let caller = self.env().caller();
-            self.secret.remove(caller.clone());
-            self.verified.remove(caller.clone());
+            return match self.verified.get(&caller) {
+                Some(verified) => verified,
+                None => false,
+            }
+        }
+
+        #[ink(message)]
+        pub fn unbind_2fa(&mut self, token: String) -> Result<(), Error> {
+            let caller = self.env().caller();
+            let verified = self.verified.get(&caller)
+                .ok_or(Error::NoVerified2FA)?;
+            if !verified {
+                return Err(Error::NoVerified2FA);
+            }
+            let secret = self.secret.get(&caller)
+                .ok_or(Error::NoVerified2FA)?;
+
+            if self.check(&token, secret) {
+                self.secret.remove(caller.clone());
+                self.verified.remove(caller.clone());
+            } else {
+                return Err(Error::InvalidToken);
+            }
 
             Ok(())
         }
@@ -204,8 +233,8 @@ mod tests {
         let accounts = ink_env::test::default_accounts::<ink_env::DefaultEnvironment>();
 
         let mut contract = FatP2FA::default();
-        let init_2fa_ret = contract.init_2fa();
-        assert!(init_2fa_ret.is_ok());
+        assert!(contract.init_2fa().is_ok());
+        let init_2fa_ret = contract.get_2fa_url();
         assert_eq!(init_2fa_ret.expect(""), "otpauth://totp/Phala2FA?secret=ZGOCQ4H53ZLIPXHMDAF4HQPP4I&issuer=PhalaNetwork&digits=6&algorithm=SHA1");
     }
 
@@ -223,6 +252,6 @@ mod tests {
 
         let mut contract = FatP2FA::default();
         contract.init_2fa();
-        assert!(contract.verify_2fa("017446".to_string()).is_ok());
+        assert!(contract.verify_bind("017446".to_string()).is_ok());
     }
 }
