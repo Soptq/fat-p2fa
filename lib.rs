@@ -8,14 +8,11 @@ use pink_extension as pink;
 mod fat_p2fa {
     use super::pink;
     use alloc::{
-        string::String,
+        string::{String, ToString},
         vec::Vec,
     };
     use ink_storage::{traits::SpreadAllocate, Mapping};
-    use pink::{
-        derive_sr25519_key,
-        PinkEnvironment,
-    };
+    use pink::derive_sr25519_key;
     use scale::{Decode, Encode};
     use ink_env::hash::{Blake2x128, HashOutput};
     use hmac::Mac;
@@ -141,7 +138,7 @@ mod fat_p2fa {
                         .try_into()
                         .unwrap()
                 ) & 0x7fff_ffff;
-            format!(
+            ink_env::format!(
                 "{1:00$}",
                 self.digits as usize,
                 result % (10 as u32).pow(self.digits as u32)
@@ -166,7 +163,7 @@ mod fat_p2fa {
         }
 
         pub fn get_url(&self, secret: &Vec<u8>, label: &str, issuer: &str) -> String {
-            format!(
+            ink_env::format!(
                 "otpauth://totp/{}?secret={}&issuer={}&digits={}&algorithm={}",
                 label.to_string(),
                 base32_secret(secret),
