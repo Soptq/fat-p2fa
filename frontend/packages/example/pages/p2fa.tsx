@@ -161,7 +161,7 @@ const P2FA: Page = () => {
         confidentiality and integrity.
       </ParagraphMedium>
       <ParagraphMedium>
-        This application is possible to serve as
+        This application is possible to serve as {' '}
         <strong>a second layer for wallet protections</strong>. Nowadays, the
         loss of private keys or mnemonic phrases generally predicts the loss of
         wallets. However, if one enables 2FA on chain, even the private keys are
