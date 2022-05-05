@@ -35,7 +35,7 @@ mod fat_p2fa {
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum Error {
         AccountNotInitialized,
-        NoVerified2FA,
+        NotVerified,
         InvalidToken,
     }
 
@@ -56,8 +56,8 @@ mod fat_p2fa {
             let salt = derive_sr25519_key!(b"p2fa-salt");
             ink_lang::codegen::initialize_contract(|contract: &mut Self| {
                 contract.digits = 6;
-                contract.skew = 2; // normally it would be 1, here we slightly enlarge it due to the latency of blocks
-                contract.duration = 30;
+                contract.skew = 1;
+                contract.duration = 30 * 1000;
                 contract.salt = salt;
             })
         }
@@ -99,13 +99,13 @@ mod fat_p2fa {
         #[ink(message)]
         pub fn verify_token(&self, token: String) -> Result<bool, Error> {
             let caller = self.env().caller();
-            let verified = self.verified.get(&caller)
-                .ok_or(Error::NoVerified2FA)?;
-            if !verified {
-                return Err(Error::NoVerified2FA);
-            }
             let secret = self.secret.get(&caller)
-                .ok_or(Error::NoVerified2FA)?;
+                .ok_or(Error::AccountNotInitialized)?;
+            let verified = self.verified.get(&caller)
+                .ok_or(Error::NotVerified)?;
+            if !verified {
+                return Err(Error::NotVerified);
+            }
             Ok(self.check(&token, secret))
         }
 
@@ -121,13 +121,13 @@ mod fat_p2fa {
         #[ink(message)]
         pub fn unbind_2fa(&mut self, token: String) -> Result<(), Error> {
             let caller = self.env().caller();
-            let verified = self.verified.get(&caller)
-                .ok_or(Error::NoVerified2FA)?;
-            if !verified {
-                return Err(Error::NoVerified2FA);
-            }
             let secret = self.secret.get(&caller)
-                .ok_or(Error::NoVerified2FA)?;
+                .ok_or(Error::AccountNotInitialized)?;
+            let verified = self.verified.get(&caller)
+                .ok_or(Error::NotVerified)?;
+            if !verified {
+                return Err(Error::NotVerified);
+            }
 
             if self.check(&token, secret) {
                 self.secret.remove(caller.clone());
