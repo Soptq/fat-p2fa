@@ -4,7 +4,7 @@
 
 This application achieves two-factor authentication on chain, without leaking any sensitive data. Specifically, secrets for 2FA are all generated on-chain with Phala Fat Contract, which ensures confidentiality and integrity.
 
-This application is possible to serves as **a second layer for wallet protections**. Nowadays, the loss of private keys or mnemonic phrases generally predicts the loss of wallets. However, if one enables 2FA on chain, even the private keys are lost, funds can be still safu.
+This application is possible to serve as **a second layer for wallet protections**. Nowadays, the loss of private keys or mnemonic phrases generally predicts the loss of wallets. However, if one enables 2FA on chain, even the private keys are lost, funds can be still safe.
 
 ## Installation
 

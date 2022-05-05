@@ -161,17 +161,17 @@ const P2FA: Page = () => {
         confidentiality and integrity.
       </ParagraphMedium>
       <ParagraphMedium>
-        This application is possible to serves as{' '}
+        This application is possible to serve as
         <strong>a second layer for wallet protections</strong>. Nowadays, the
         loss of private keys or mnemonic phrases generally predicts the loss of
         wallets. However, if one enables 2FA on chain, even the private keys are
-        lost, funds can be still safu.
+        lost, funds can be still safe.
       </ParagraphMedium>
       {contract ? (
         certificateData ? (
           <>
             <ParagraphMedium>
-              2FA enabled for your account: {enabled2fa}
+              <strong>2FA enabled for your account: {enabled2fa}</strong>
             </ParagraphMedium>
             <HeadingMedium as="h1">1. Initialize 2FA</HeadingMedium>
             <ParagraphMedium>
