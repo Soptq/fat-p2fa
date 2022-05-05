@@ -6,7 +6,7 @@ This application achieves two-factor authentication on chain, without leaking an
 
 This application is possible to serve as **a second layer for wallet protections**. Nowadays, the loss of private keys or mnemonic phrases generally predicts the loss of wallets. However, if one enables 2FA on chain, even the private keys are lost, funds can be still safe.
 
-Live URL: https://fat-p2fa.vercel.app/p2fa
+Live site (on POC-5 Testnet): https://fat-p2fa.vercel.app/p2fa
 
 ## Installation
 
